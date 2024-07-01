@@ -15,3 +15,19 @@
 [1]main主线程
 
 "main" #1 prio=5 os_prio=0 tid=0x00000000028f4800 nid=0x25ac waiting on condition [0x00000000028ef000] （操作系统面向的是JVM 进程，JVM 进程里面向的是 我们的main函数，。所以对于我们的操作系统如何看待我们的main函数优先级，无所谓。 只要os 给我们jvm进程足够公平的优先级就行。）
+
+## 线程的优先级和守护线程
+
+setPriority 这个方法，他是 jvm 提供的一个方法，并且能够调用 本地方法 setPriority0. 我们发现优先级貌似没有起作用，为什么？ 1. 我们现在的计算机都是多核的，t1，t2 会让哪个cpu处理不好说。由不同的cpu同时提供资源执行。 2. 优先级不代表先后顺序。哪怕你的优先级低，也是有可能先拿到我们的cpu时间片的，只不过这个时间片比高优先级的线程的时间片短。 优先级针对的是 cpu时间片的长短问题。 3. 目前工作中，实际项目里，不必要使用setPriority方法。我们现在都是用 hystrix， sential也好，一些开源的信号量控制工具，都能够实现线程资源的合理调度。这个 setPriority方法，很难控制。实际的运行环境太复杂。
+
+```java
+public final void setDaemon(boolean on) {
+    checkAccess();
+    if (isAlive()) {
+		// 告诉我们，必须要先设置线程是否为守护线程，然后再调用start方法。如果你先调用start。 isAlive = true.
+        throw new IllegalThreadStateException();
+    }
+    daemon = on;
+}
+```
+
