@@ -31,3 +31,76 @@ public final void setDaemon(boolean on) {
 }
 ```
 
+## Stack log解读
+
+```java
+"BlockedThread-2" #15 prio=5 os_prio=0 tid=0x000000001b956000 nid=0x22d8 waiting for monitor entry [0x000000001d0be000] (发现死锁，一直不会释放的话)
+   java.lang.Thread.State: BLOCKED (on object monitor)
+        at com.boot.jdk.Blocked.run(ReadStackLog.java:45)
+        - waiting to lock <0x00000000d67bca20> (a java.lang.Class for com.boot.jdk.Blocked)
+        at java.lang.Thread.run(Thread.java:745)
+
+"BlockedThread-1" #14 prio=5 os_prio=0 tid=0x000000001b955000 nid=0x4c4c waiting on condition [0x000000001cfbf000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+        at java.lang.Thread.sleep(Native Method)
+        at com.boot.jdk.Blocked.run(ReadStackLog.java:45)
+        - locked <0x00000000d67bca20> (a java.lang.Class for com.boot.jdk.Blocked)
+        at java.lang.Thread.run(Thread.java:745)
+
+"WaitingThread" #13 prio=5 os_prio=0 tid=0x000000001b954800 nid=0x39cc in Object.wait() [0x000000001cebf000]
+   java.lang.Thread.State: WAITING (on object monitor)
+        at java.lang.Object.wait(Native Method)
+        - waiting on <0x00000000d67ba680> (a java.lang.Class for com.boot.jdk.Waiting)
+        at java.lang.Object.wait(Object.java:502)
+        at com.boot.jdk.Waiting.run(ReadStackLog.java:31)
+        - locked <0x00000000d67ba680> (a java.lang.Class for com.boot.jdk.Waiting)
+        at java.lang.Thread.run(Thread.java:745)
+
+"TimeWaitingThread" #12 prio=5 os_prio=0 tid=0x000000001b951800 nid=0x3820 waiting on condition [0x000000001cdbe000]
+   java.lang.Thread.State: TIMED_WAITING (sleeping)
+        at java.lang.Thread.sleep(Native Method)
+        at com.boot.jdk.TimeWaiting.run(ReadStackLog.java:20)
+        at java.lang.Thread.run(Thread.java:745)
+"Monitor Ctrl-Break" #6 daemon prio=5 os_prio=0 tid=0x000000001b6c9000 nid=0x1210 runnable [0x000000001c6be000]
+   java.lang.Thread.State: RUNNABLE
+        at java.net.SocketInputStream.socketRead0(Native Method)
+        at java.net.SocketInputStream.socketRead(SocketInputStream.java:116)
+        at java.net.SocketInputStream.read(SocketInputStream.java:170)
+        at java.net.SocketInputStream.read(SocketInputStream.java:141)
+        at sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:284)
+        at sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:326)
+        at sun.nio.cs.StreamDecoder.read(StreamDecoder.java:178)
+        - locked <0x00000000d67070b8> (a java.io.InputStreamReader)
+        at java.io.InputStreamReader.read(InputStreamReader.java:184)
+        at java.io.BufferedReader.fill(BufferedReader.java:161)
+        at java.io.BufferedReader.readLine(BufferedReader.java:324)
+        - locked <0x00000000d67070b8> (a java.io.InputStreamReader)
+        at java.io.BufferedReader.readLine(BufferedReader.java:389)
+        at com.intellij.rt.execution.application.AppMainV2$1.run(AppMainV2.java:64)
+
+"Attach Listener" #5 daemon prio=5 os_prio=2 tid=0x000000001a72b000 nid=0x4ea8 waiting on condition [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Signal Dispatcher" #4 daemon prio=9 os_prio=2 tid=0x000000001a6d2800 nid=0x3d94 runnable [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Finalizer" #3 daemon prio=8 os_prio=1 tid=0x000000001a6b1800 nid=0x4254 in Object.wait() [0x000000001ab8f000] （只有进行垃圾收集的时候，才会被notify。 用到我们的 signal Dispatcher）
+   java.lang.Thread.State: WAITING (on object monitor)
+        at java.lang.Object.wait(Native Method)
+        - waiting on <0x00000000d6108e98> (a java.lang.ref.ReferenceQueue$Lock)
+        at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:143)
+        - locked <0x00000000d6108e98> (a java.lang.ref.ReferenceQueue$Lock)
+        at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:164)
+        at java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:209)
+
+"Reference Handler" #2 daemon prio=10 os_prio=2 tid=0x00000000187c1000 nid=0x48a8 in Object.wait() [0x000000001a68f000] （引用处理线程。）
+   java.lang.Thread.State: WAITING (on object monitor)
+        at java.lang.Object.wait(Native Method)
+        - waiting on <0x00000000d6106b40> (a java.lang.ref.Reference$Lock)
+        at java.lang.Object.wait(Object.java:502)
+        at java.lang.ref.Reference.tryHandlePending(Reference.java:191)
+        - locked <0x00000000d6106b40> (a java.lang.ref.Reference$Lock)
+        at java.lang.ref.Reference$ReferenceHandler.run(Reference.java:153)       
+       
+```
+
