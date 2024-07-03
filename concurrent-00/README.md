@@ -104,3 +104,12 @@ public final void setDaemon(boolean on) {
        
 ```
 
+## 线程状态转换
+
+![image-20240703222249942](assets/image-20240703222249942.png)
+
+Thread.start 之后，他会进入一个就绪状态，还没有分配到 cpu的执行权。 当cpu的时间片切换到他的时候，他才会开始执行，进入running状态。
+
+BLOCKED:只针对我们的sync锁
+
+Thread.join 方法，他底层代码调用的是 Object的 wait方法。那么想要唤醒join方法，就需要使用 object的notify以及 notifyall
