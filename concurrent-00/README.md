@@ -113,3 +113,54 @@ Thread.start 之后，他会进入一个就绪状态，还没有分配到 cpu的
 BLOCKED:只针对我们的sync锁
 
 Thread.join 方法，他底层代码调用的是 Object的 wait方法。那么想要唤醒join方法，就需要使用 object的notify以及 notifyall
+
+## Thread源码解读-init和start方法
+
+```java
+Thread.init方法代码片段：
+if (g == null) {
+       if (security != null) {
+        g = security.getThreadGroup();
+    }
+       if (g == null) {
+        g = parent.getThreadGroup();
+    }
+}
+尊重线程初始化传入的threadgroup；次选System security mananger 的 ThreadGroup；再次选 parent的 ThreadGroup。
+
+g.addUnstarted(); // NEW状态的线程，会添加到ThreadGroup。
+this.daemon = parent.isDaemon();
+this.priority = parent.getPriority();
+新的线程的属性依赖于 父类线程。
+
+private static synchronized long nextThreadID() {
+    return ++threadSeqNumber;
+}
+保证我们的tid的唯一性。
+
+public synchronized void start() {}
+避免多线程同时启动一个线程。IllegalThreadStateException
+
+try {
+// start0 完全执行完之前，线程处于 Ready
+    start0();
+// 完成后，只要cpu分配执行权，我们的线程就进入了Running状态。
+    started = true;
+}
+
+try {
+    if (!started) {
+        group.threadStartFailed(this);
+    }
+} catch (Throwable ignore) {
+    /* do nothing. If start0 threw a Throwable then
+      it will be passed up the call stack */
+Start0 这个异常，会直接反馈给我们的调用线程。
+Main函数里边的 thread.start方法。 防止我们的 thread.start方法感知不到异常，导致程序的错误的继续执行。
+}
+```
+
+一个新构造的线程对象是由其parent线程来进行空间分配的，而child线程继承了parent是否为Daemon、优先级和加载资源的contextClassLoader以及可继承的ThreadLocal，同时还会分配一个唯一的（sync）ID来标识这个child线程。至此，一个能够运行的线程对象就初始化好了，在堆内存中等待着运行。
+
+线程对象在初始化完成之后，调用start()方法就可以启动这个线程。线程start()方法的含义是：当前线程（即parent线程）同步告知Java虚拟机，只要线程规划器空闲，应立即启动调用start()方法的线程。
+
