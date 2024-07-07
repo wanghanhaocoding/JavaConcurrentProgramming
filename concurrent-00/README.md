@@ -164,3 +164,21 @@ Main函数里边的 thread.start方法。 防止我们的 thread.start方法感�
 
 线程对象在初始化完成之后，调用start()方法就可以启动这个线程。线程start()方法的含义是：当前线程（即parent线程）同步告知Java虚拟机，只要线程规划器空闲，应立即启动调用start()方法的线程。
 
+## Thread源码解读-sleep和wait方法
+
+```java
+Thread.sleep
+1.是否释放锁？ 不
+Causes the currently executing thread to sleep (temporarily cease execution) for the specified number of milliseconds, subject to the precision and accuracy of system timers and schedulers. The thread does not lose ownership of any monitors.
+2.是否对中断敏感？是
+public static native void sleep(long millis) throws InterruptedException;
+3.是否释放CPU？是
+Object.wait
+1.是否释放锁？ 不
+The current thread must own this object's monitor. The thread releases ownership of this monitor and waits until another thread notifies threads waiting on this object's monitor to wake up either through a call to the notify method or the notifyAll method. The thread then waits until it can re-obtain ownership of the monitor and resumes execution.
+2.是否对中断敏感？是
+public final void wait() throws InterruptedException {
+3.是否释放CPU？是
+让出 CPU 时间片。进入等待队列。    
+```
+
