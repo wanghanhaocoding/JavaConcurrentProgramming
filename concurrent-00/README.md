@@ -174,11 +174,28 @@ Causes the currently executing thread to sleep (temporarily cease execution) for
 public static native void sleep(long millis) throws InterruptedException;
 3.是否释放CPU？是
 Object.wait
-1.是否释放锁？ 不
+1.是否释放锁？ 是
 The current thread must own this object's monitor. The thread releases ownership of this monitor and waits until another thread notifies threads waiting on this object's monitor to wake up either through a call to the notify method or the notifyAll method. The thread then waits until it can re-obtain ownership of the monitor and resumes execution.
 2.是否对中断敏感？是
 public final void wait() throws InterruptedException {
 3.是否释放CPU？是
 让出 CPU 时间片。进入等待队列。    
+```
+
+## Thread源码解读-join方法
+
+```java
+Thread.join
+1.是否释放锁？ 具体要看当前的锁对象是谁。如果是调用join方法的锁对象，则释放。  
+synchronized(obj){
+    thread.join(); //join不释放锁
+}
+synchronized(thread){
+    thread.join(); //join释放锁
+}
+2. 是否对中断敏感 ： 是
+public final void join() throws InterruptedException {
+3. 是否释放 CPU ：是的    
+底层源码 调用的是 wait 方法。  
 ```
 
