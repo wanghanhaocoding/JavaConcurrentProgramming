@@ -193,6 +193,14 @@ synchronized(obj){
 synchronized(thread){
     thread.join(); //join释放锁
 }
+Thread的 join方法（普通方法。）
+if (millis == 0) {
+    while (isAlive()) {
+        wait(0);
+//这个wait是调用的Object的，但是这是父类。其实这个wait方法前边有一个隐含的意义： this.wait(不是很准确)--》 当前的线程类（Thread类--有一个当前的线程）。 其实目前来看，这个是当前线程释放了cpu，而且是当前线程（Thread类）这个对象释放了锁。
+    }
+}
+Thread的join方法，释放的是当前调用 join方法的那个对象的锁。
 2. 是否对中断敏感 ： 是
 public final void join() throws InterruptedException {
 3. 是否释放 CPU ：是的    
