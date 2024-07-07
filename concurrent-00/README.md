@@ -207,3 +207,24 @@ public final void join() throws InterruptedException {
 底层源码 调用的是 wait 方法。  
 ```
 
+## 线程间的通讯方式
+
+1. volitate 、synchronize、lock。（都保证可见性）
+
+2.  wait、notify、await() 、 signal
+
+3.  管道输入、输出流  (PipeInOut.java)	
+
+   管道输入/输出流和普通的文件输入/输出流或者网络输入/输出流不同之处在于，它主要用于线程之间的数据传输，而传输的媒介为内存。
+
+   管道输入/输出流主要包括了如下4种具体实现：PipedOutputStream、PipedInputStream、PipedReader和PipedWriter，前两种面向字节，而后两种面向字符。
+
+4.  Thread.join() ： 隐式唤醒。等待其他线程执行完成，其他线程会发送唤醒信号。
+
+5.  ThradLocal() --->支持子线程集成的一种形式。
+
+6.  线程中断 
+
+中断可以理解为线程的一个标识位属性，它表示一个运行中的线程是否被其他线程进行了中断操作。中断好比其他线程对该线程打了个招呼，其他线程通过调用该线程的interrupt()方法对其进行中断操作。
+
+线程通过检查自身是否被中断来进行响应，线程通过方法isInterrupted()来进行判断是否被中断，也可以调用静态方法Thread.interrupted()对当前线程的中断标识位进行复位。如果该线程已经处于终结状态，即使该线程被中断过，在调用该线程对象的isInterrupted()时依旧会返回false。从Java的API中可以看到，许多声明抛出InterruptedException的方法（例如Thread.sleep(long millis)方法）这些方法在抛出InterruptedException之前，Java虚拟机会先将该线程的中断标识位清除，然后抛出InterruptedException，此时调用isInterrupted()方法将会返回false。
