@@ -245,3 +245,17 @@ Markword从未丢失。
 尝试使用定时锁，使用lock.tryLock（timeout）来替代使用内部锁机制。
 
 对于数据库锁，加锁和解锁必须在一个数据库连接里，否则会出现解锁失败的情况。
+
+## ObjectMonitor的属性
+
+1. header ： 重量级锁保存markword的地方
+
+2.  own: 指向我们持有锁的线程；对象的markword里边也保存了指向monitor的指针；
+
+3.  _cxq 队列： 竞争队列。 A线程持有锁没有释放； B和C线程同时过来争抢锁，都被block了，此时会将B和C线程加入到 该队列。
+
+4.  EntryList队列：同步队列。A线程释放锁，B和C线程中会选定一个继承者（可以去争抢锁的这个线程），另外一个线程会被放入我们的EntryList队列里边。
+
+5.  waitset：等待队列。Object wait的线程。
+
+A线程持有锁，BC线程过来竞争失败，进入cxq -- 下轮竞争会把 cxq里的线程移动到EntrylIst中。假设B线程竞争到了锁，然后B线程调用了 Object.Wait方法，这时候B线程进入waitset，并释放锁。C线程拿到了锁，然后唤醒B线程。B线程会从waitset里边出来，直接竞争锁。如果竞争失败进入cxq，继续轮回，如果竞争成功，ok了。
